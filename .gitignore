@@ -1,0 +1,70 @@
+# .gitignore for Node.js / Next.js monorepo
+
+# Node modules
+node_modules/
+**/node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs
+*.log
+
+# Runtime
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.next/**
+
+# Environment files (ignore local secrets, keep .env.example)
+.env
+.env.local
+.env.*.local
+
+# IDE / editor
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Misc
+*.tgz
+*.log
+
+# Ignore lockfile directories of some package managers
+.pnp/
+.pnp.js
+
+# Optional: temp
+tmp/
+temp/
+
+# Windows thumbnail cache
+ehthumbs.db
+
+# Ignore secrets and keystores
+*.keystore
+
+# End

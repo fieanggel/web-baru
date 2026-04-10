@@ -1,0 +1,235 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Warm orange palette */
+  --background: #fff8f0; /* page background */
+  --background-2: #fff3ea; /* subtle gradient stop */
+  --accent: #f97316; /* primary orange */
+  --accent-dark: #c2410c;
+  --card-bg: #ffffff; /* distinct white card background */
+  --card-border: rgba(16,24,40,0.08);
+  --text: #000000; /* pure black for maximum contrast */
+  --muted: #475569; /* muted but readable */
+  --input-bg: #ffffff;
+  --focus-ring: rgba(249,115,22,0.12);
+  --shadow: 0 20px 40px rgba(16,24,40,0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --text: #ededed;
+  }
+}
+
+body {
+  background: linear-gradient(180deg, var(--background), var(--background-2));
+  color: var(--text);
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reusable card style to blend with the warm background */
+.app-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow);
+}
+
+/* Highlighted card for create form */
+.highlight-card {
+  position: relative;
+  padding-left: 2rem; /* make room for accent strip */
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 18px 40px rgba(16,24,40,0.08);
+}
+
+.highlight-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.app-card input,
+.app-card textarea,
+.app-card select {
+  background: var(--input-bg);
+  border: 1px solid rgba(16,24,40,0.12);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  opacity: 1 !important;
+  font-weight: 600;
+}
+
+/* Mirror input styles for highlighted form cards */
+.highlight-card input,
+.highlight-card textarea,
+.highlight-card select {
+  background: var(--input-bg);
+  border: 1px solid rgba(16,24,40,0.12);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  opacity: 1 !important;
+  font-weight: 600;
+}
+
+/* Placeholder rules (cross-browser) */
+.app-card input::placeholder,
+.app-card textarea::placeholder,
+.app-card input::-webkit-input-placeholder,
+.app-card textarea::-webkit-input-placeholder,
+.app-card input::-moz-placeholder,
+.app-card textarea::-moz-placeholder,
+.app-card input:-ms-input-placeholder,
+.app-card textarea:-ms-input-placeholder {
+  color: #000000 !important;
+  opacity: 0.85 !important;
+}
+
+/* Placeholder styles for highlighted form cards */
+.highlight-card input::placeholder,
+.highlight-card textarea::placeholder,
+.highlight-card input::-webkit-input-placeholder,
+.highlight-card textarea::-webkit-input-placeholder,
+.highlight-card input::-moz-placeholder,
+.highlight-card textarea::-moz-placeholder,
+.highlight-card input:-ms-input-placeholder,
+.highlight-card textarea:-ms-input-placeholder {
+  color: #000000 !important;
+  opacity: 0.85 !important;
+}
+
+/* Autofill color (webkit) */
+.app-card input:-webkit-autofill,
+.app-card textarea:-webkit-autofill {
+  -webkit-text-fill-color: #000000 !important;
+}
+
+/* Autofill for highlight cards */
+.highlight-card input:-webkit-autofill,
+.highlight-card textarea:-webkit-autofill {
+  -webkit-text-fill-color: #000000 !important;
+}
+
+.app-card label { color: var(--text) !important; font-weight: 600 !important }
+.highlight-card label { color: var(--text) !important; font-weight: 600 !important }
+
+/* Force labels inside highlighted form to be fully opaque black */
+.highlight-card label,
+.highlight-card label.block,
+.highlight-card label[class*="text-"] {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  opacity: 1 !important;
+  font-weight: 700 !important;
+  filter: none !important;
+}
+
+.app-card input:focus,
+.app-card textarea:focus,
+.app-card select:focus {
+  outline: none;
+  box-shadow: 0 0 0 6px var(--focus-ring);
+  border-color: var(--accent);
+}
+
+/* Focus state for highlight-card inputs */
+.highlight-card input:focus,
+.highlight-card textarea:focus,
+.highlight-card select:focus {
+  outline: none;
+  box-shadow: 0 0 0 6px var(--focus-ring);
+  border-color: var(--accent);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+  color: white;
+  padding: 0.55rem 1rem;
+  border-radius: 0.6rem;
+  border: none;
+  box-shadow: 0 12px 28px rgba(194,65,12,0.14);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary:hover { filter: brightness(0.95); }
+
+table thead tr {
+  background: rgba(249,115,22,0.06);
+  color: var(--accent-dark);
+}
+
+table tbody tr:hover { background: rgba(249,115,22,0.02); }
+
+.small-muted { color: var(--muted); }
+
+/* Branding / header */
+.brand-logo {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+  box-shadow: 0 6px 18px rgba(194,65,12,0.14);
+}
+
+.brand { display:flex; align-items:center; gap:0.75rem }
+
+.empty-illustration { opacity: 0.88 }
+
+.refresh-btn { border:1px solid rgba(16,24,40,0.06); padding:6px 10px; border-radius:8px }
+
+
+/* Global overrides: ensure inputs and placeholders render as black */
+input,
+textarea,
+select,
+input[type="text"],
+input[type="email"],
+input[type="search"] {
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+  opacity: 1 !important;
+}
+
+input::placeholder,
+textarea::placeholder,
+select::placeholder,
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder,
+select::-webkit-input-placeholder,
+input::-moz-placeholder,
+textarea::-moz-placeholder,
+select::-moz-placeholder,
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder,
+select:-ms-input-placeholder {
+  color: rgba(0,0,0,0.85) !important;
+  opacity: 1 !important;
+}
+
+/* Autofill color (WebKit) - keep values readable */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+

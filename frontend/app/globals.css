@@ -1,235 +1,226 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+@config "../tailwind.config.ts";
 @import "tailwindcss";
 
 :root {
-  /* Warm orange palette */
-  --background: #fff8f0; /* page background */
-  --background-2: #fff3ea; /* subtle gradient stop */
-  --accent: #f97316; /* primary orange */
-  --accent-dark: #c2410c;
-  --card-bg: #ffffff; /* distinct white card background */
-  --card-border: rgba(16,24,40,0.08);
-  --text: #000000; /* pure black for maximum contrast */
-  --muted: #475569; /* muted but readable */
-  --input-bg: #ffffff;
-  --focus-ring: rgba(249,115,22,0.12);
-  --shadow: 0 20px 40px rgba(16,24,40,0.08);
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --text: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: linear-gradient(180deg, var(--background), var(--background-2));
-  color: var(--text);
-  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+  font-family: var(--font-inter), Inter, sans-serif;
+  background: #f5f6f7;
+  color: #2c2f30;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Reusable card style to blend with the warm background */
-.app-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--shadow);
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-manrope), Manrope, sans-serif;
 }
 
-/* Highlighted card for create form */
-.highlight-card {
-  position: relative;
-  padding-left: 2rem; /* make room for accent strip */
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: 0 18px 40px rgba(16,24,40,0.08);
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-.highlight-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 6px;
-  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
-  border-top-left-radius: 12px;
-  border-bottom-left-radius: 12px;
+.glass-nav {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
 }
 
-.app-card input,
-.app-card textarea,
-.app-card select {
-  background: var(--input-bg);
-  border: 1px solid rgba(16,24,40,0.12);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  width: 100%;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-  opacity: 1 !important;
-  font-weight: 600;
+.text-tech-green {
+  color: #22c55e;
 }
 
-/* Mirror input styles for highlighted form cards */
-.highlight-card input,
-.highlight-card textarea,
-.highlight-card select {
-  background: var(--input-bg);
-  border: 1px solid rgba(16,24,40,0.12);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  width: 100%;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-  opacity: 1 !important;
-  font-weight: 600;
+.bg-tech-green {
+  background-color: #22c55e;
 }
 
-/* Placeholder rules (cross-browser) */
-.app-card input::placeholder,
-.app-card textarea::placeholder,
-.app-card input::-webkit-input-placeholder,
-.app-card textarea::-webkit-input-placeholder,
-.app-card input::-moz-placeholder,
-.app-card textarea::-moz-placeholder,
-.app-card input:-ms-input-placeholder,
-.app-card textarea:-ms-input-placeholder {
-  color: #000000 !important;
-  opacity: 0.85 !important;
+.border-tech-green {
+  border-color: #22c55e;
 }
 
-/* Placeholder styles for highlighted form cards */
-.highlight-card input::placeholder,
-.highlight-card textarea::placeholder,
-.highlight-card input::-webkit-input-placeholder,
-.highlight-card textarea::-webkit-input-placeholder,
-.highlight-card input::-moz-placeholder,
-.highlight-card textarea::-moz-placeholder,
-.highlight-card input:-ms-input-placeholder,
-.highlight-card textarea:-ms-input-placeholder {
-  color: #000000 !important;
-  opacity: 0.85 !important;
+.text-electric-blue {
+  color: #3b82f6;
 }
 
-/* Autofill color (webkit) */
-.app-card input:-webkit-autofill,
-.app-card textarea:-webkit-autofill {
-  -webkit-text-fill-color: #000000 !important;
+.tonal-shift {
+  background-color: #eff1f2;
 }
 
-/* Autofill for highlight cards */
-.highlight-card input:-webkit-autofill,
-.highlight-card textarea:-webkit-autofill {
-  -webkit-text-fill-color: #000000 !important;
+.tonal-shift-bottom {
+  border-bottom: 0;
 }
 
-.app-card label { color: var(--text) !important; font-weight: 600 !important }
-.highlight-card label { color: var(--text) !important; font-weight: 600 !important }
-
-/* Force labels inside highlighted form to be fully opaque black */
-.highlight-card label,
-.highlight-card label.block,
-.highlight-card label[class*="text-"] {
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-  opacity: 1 !important;
-  font-weight: 700 !important;
-  filter: none !important;
+.active-nav-link {
+  transform: translateX(4px);
 }
 
-.app-card input:focus,
-.app-card textarea:focus,
-.app-card select:focus {
-  outline: none;
-  box-shadow: 0 0 0 6px var(--focus-ring);
-  border-color: var(--accent);
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-/* Focus state for highlight-card inputs */
-.highlight-card input:focus,
-.highlight-card textarea:focus,
-.highlight-card select:focus {
-  outline: none;
-  box-shadow: 0 0 0 6px var(--focus-ring);
-  border-color: var(--accent);
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.btn-primary {
-  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
-  color: white;
-  padding: 0.55rem 1rem;
-  border-radius: 0.6rem;
-  border: none;
-  box-shadow: 0 12px 28px rgba(194,65,12,0.14);
-  cursor: pointer;
-  font-weight: 600;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.btn-primary:hover { filter: brightness(0.95); }
-
-table thead tr {
-  background: rgba(249,115,22,0.06);
-  color: var(--accent-dark);
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
-table tbody tr:hover { background: rgba(249,115,22,0.02); }
-
-.small-muted { color: var(--muted); }
-
-/* Branding / header */
-.brand-logo {
-  display: inline-block;
-  width: 40px;
-  height: 40px;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
-  box-shadow: 0 6px 18px rgba(194,65,12,0.14);
+@keyframes slide-left {
+  from {
+    opacity: 0;
+    transform: translate3d(-24px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
-.brand { display:flex; align-items:center; gap:0.75rem }
-
-.empty-illustration { opacity: 0.88 }
-
-.refresh-btn { border:1px solid rgba(16,24,40,0.06); padding:6px 10px; border-radius:8px }
-
-
-/* Global overrides: ensure inputs and placeholders render as black */
-input,
-textarea,
-select,
-input[type="text"],
-input[type="email"],
-input[type="search"] {
-  color: var(--text) !important;
-  -webkit-text-fill-color: var(--text) !important;
-  opacity: 1 !important;
+@keyframes slide-right {
+  from {
+    opacity: 0;
+    transform: translate3d(24px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
-input::placeholder,
-textarea::placeholder,
-select::placeholder,
-input::-webkit-input-placeholder,
-textarea::-webkit-input-placeholder,
-select::-webkit-input-placeholder,
-input::-moz-placeholder,
-textarea::-moz-placeholder,
-select::-moz-placeholder,
-input:-ms-input-placeholder,
-textarea:-ms-input-placeholder,
-select:-ms-input-placeholder {
-  color: rgba(0,0,0,0.85) !important;
-  opacity: 1 !important;
+@keyframes soft-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
-/* Autofill color (WebKit) - keep values readable */
-input:-webkit-autofill,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-  -webkit-text-fill-color: var(--text) !important;
-  transition: background-color 5000s ease-in-out 0s;
+.page-enter {
+  animation: fade-in 0.45s ease-out both;
+}
+
+.reveal-up {
+  animation: fade-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.reveal-left {
+  animation: slide-left 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.reveal-right {
+  animation: slide-right 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.delay-1 {
+  animation-delay: 0.08s;
+}
+
+.delay-2 {
+  animation-delay: 0.16s;
+}
+
+.delay-3 {
+  animation-delay: 0.24s;
+}
+
+.delay-4 {
+  animation-delay: 0.32s;
+}
+
+.delay-5 {
+  animation-delay: 0.4s;
+}
+
+.float-soft {
+  animation: soft-float 6s ease-in-out infinite;
+}
+
+.card-hover {
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-6px);
+}
+
+.smooth-ui a,
+.smooth-ui button,
+.smooth-ui input,
+.smooth-ui textarea,
+.smooth-ui select {
+  transition:
+    color 0.22s ease,
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+}
+
+.smooth-ui a:active,
+.smooth-ui button:active {
+  transform: scale(0.99);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .page-enter,
+  .reveal-up,
+  .reveal-left,
+  .reveal-right,
+  .float-soft {
+    animation: none !important;
+  }
+
+  .card-hover,
+  .smooth-ui a,
+  .smooth-ui button,
+  .smooth-ui input,
+  .smooth-ui textarea,
+  .smooth-ui select {
+    transition: none !important;
+  }
 }
 
 

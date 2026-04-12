@@ -1,188 +1,163 @@
-"use client"
-import React, { useEffect, useState, useRef } from "react"
-
-type User = { id: number; name: string; email: string }
-
 export default function Home() {
-  const [users, setUsers] = useState<User[]>([])
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const nameInputRef = useRef<HTMLInputElement | null>(null)
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
-  console.log('API baseUrl =', baseUrl)
-
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  async function fetchUsers() {
-    setLoading(true)
-    try {
-      const res = await fetch(`${baseUrl}/api/users`)
-      const data = await res.json()
-      setUsers(data)
-    } catch (err) {
-      console.error(err)
-      setError('Gagal memuat data')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    console.log('handleSubmit called, editingId =', editingId)
-    setError("")
-    if (!name.trim() || !email.trim()) {
-      setError('Name dan email dibutuhkan')
-      return
-    }
-    const payload = { name: name.trim(), email: email.trim() }
-    console.log('POST payload', payload)
-    try {
-      let res
-      if (editingId) {
-        res = await fetch(`${baseUrl}/api/users/${editingId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        })
-      } else {
-        res = await fetch(`${baseUrl}/api/users`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        })
-      }
-      console.log('POST response status', res.status)
-      const resText = await res.text()
-      try { console.log('POST response body', JSON.parse(resText)) } catch { console.log('POST response body', resText) }
-      if (!res.ok) {
-        setError('Server error: ' + res.status)
-        return
-      }
-      setName("")
-      setEmail("")
-      setEditingId(null)
-      fetchUsers()
-    } catch (err) {
-      console.error(err)
-      setError('Gagal menyimpan data')
-    }
-  }
-
-  function startEdit(u: User) {
-    setEditingId(u.id)
-    setName(u.name)
-    setEmail(u.email)
-  }
-
-  async function handleDelete(id: number) {
-    if (!confirm("Hapus user ini?")) return
-    try {
-      await fetch(`${baseUrl}/api/users/${id}`, { method: "DELETE" })
-      fetchUsers()
-    } catch (err) {
-      console.error(err)
-      setError('Gagal menghapus data')
-    }
-  }
-
   return (
-    <main className="min-h-screen bg-orange-50 py-12 px-4">
-      <div className="max-w-5xl mx-auto">
-        <header className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="brand">
-              <div className="brand-logo" aria-hidden></div>
-              <div>
-                <h1 className="text-3xl font-bold text-black">User Management</h1>
-                <p className="text-black text-sm mt-0.5">CRUD sederhana untuk user </p>
+    <main className="page-enter bg-surface font-body text-on-surface antialiased">
+      <nav className="fixed top-0 w-full z-50 glass-nav shadow-sm reveal-up">
+        <div className="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+          <div className="text-xl font-black text-green-700 tracking-tighter font-headline">
+            REVOLUSI KELOLA SAMPAH
+          </div>
+          <div className="hidden md:flex gap-8 items-center">
+            <a className="text-green-700 border-b-2 border-green-700 pb-1 font-medium" href="#hero">
+              Solutions
+            </a>
+            <a
+              className="text-slate-600 font-medium hover:text-green-600 transition-colors duration-300"
+              href="#technology"
+            >
+              Technology
+            </a>
+            <a
+              className="text-slate-600 font-medium hover:text-green-600 transition-colors duration-300"
+              href="#impact"
+            >
+              Impact
+            </a>
+            <a
+              className="text-slate-600 font-medium hover:text-green-600 transition-colors duration-300"
+              href="#about"
+            >
+              About Us
+            </a>
+          </div>
+          <div className="flex gap-4 items-center">
+            <a className="hidden lg:block text-slate-600 font-medium hover:text-green-600 transition-all" href="/login">
+              Login
+            </a>
+            <a className="bg-primary text-on-primary px-6 py-2 rounded-xl font-bold tracking-tight scale-95 active:duration-100 transition-transform" href="/register">
+              Get Started
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <header id="hero" className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            alt="Futuristic integrated waste management facility with robotic arms, IoT sensors, and lush greenery in a clean high-tech environment"
+            className="w-full h-full object-cover opacity-90"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1ReKhUe5efMDwmJJj1GCN6yQiG_JABo1F-voNFbDuNaSgdQ6Ei0KPTFBWgn_lQCTaNlVPhLU-eWqptbEvXgc2geyBO9t5kCoHsqbCpkEym6o2YE85a-Q1vMfJwdJE1jiA5wIH-efKnP63V1AX5mM92o3k3MlSheTZfLMDaOUelP51iEoQ-1bTX84D4__r6OiiI9gDQVuAnu6E3RmtLe2umMhZgxYCP49_mHm20BfkQ4BNgK319Y0c-qr1ME6FyrsuIsx6URIKAfCm"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/60 to-transparent"></div>
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-8 grid lg:grid-cols-2 gap-12">
+          <div className="flex flex-col justify-center reveal-up">
+            <div className="inline-flex items-center gap-2 bg-primary-container/30 border border-primary/10 px-4 py-1 rounded-full w-fit mb-6 reveal-up delay-1">
+              <span className="material-symbols-outlined text-tech-green text-sm">settings_input_antenna</span>
+              <span className="text-xs font-bold tracking-widest text-primary uppercase">
+                IoT Enabled Eco-System
+              </span>
+            </div>
+            <h1 className="font-headline font-black text-5xl md:text-7xl text-on-surface leading-[1.1] mb-6 tracking-tighter reveal-up delay-2">
+              REVOLUSI KELOLA SAMPAH: <span className="text-tech-green">BERSIH, PINTAR, BERDAYA</span>
+            </h1>
+            <p className="text-lg md:text-xl text-on-surface-variant max-w-xl mb-10 leading-relaxed font-body reveal-up delay-3">
+              Sistem Manajemen Sampah Terintegrasi IoT. Pantau, Pilah, dan Daur Ulang dengan Mudah.
+              Transformasi digital untuk masa depan yang lebih hijau.
+            </p>
+            <div className="flex flex-wrap gap-4 reveal-up delay-4">
+              <a className="bg-tech-green text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl shadow-tech-green/20 hover:scale-105 transition-transform" href="/register">
+                MULAI SEKARANG
+              </a>
+              <a className="bg-white/80 backdrop-blur px-8 py-4 rounded-xl font-bold text-lg text-on-surface flex items-center gap-2 hover:bg-white transition-all" href="/login">
+                <span className="material-symbols-outlined">play_circle</span>
+                Lihat Demo
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section id="impact" className="py-12 bg-surface-container-low">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 -mt-24 relative z-20">
+            <div className="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/5 card-hover reveal-up">
+              <span className="material-symbols-outlined text-tech-green text-4xl mb-4">eco</span>
+              <div className="text-4xl font-headline font-black text-on-surface mb-1">12.4K</div>
+              <div className="text-on-surface-variant font-medium">Tons Carbon Offset</div>
+            </div>
+            <div className="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/5 card-hover reveal-up delay-1">
+              <span className="material-symbols-outlined text-electric-blue text-4xl mb-4">delete_sweep</span>
+              <div className="text-4xl font-headline font-black text-on-surface mb-1">85%</div>
+              <div className="text-on-surface-variant font-medium">Waste Diverted from Landfill</div>
+            </div>
+            <div className="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/5 card-hover reveal-up delay-2">
+              <span className="material-symbols-outlined text-tertiary text-4xl mb-4">precision_manufacturing</span>
+              <div className="text-4xl font-headline font-black text-on-surface mb-1">200+</div>
+              <div className="text-on-surface-variant font-medium">Smart Facilities Active</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="technology" className="py-24 bg-surface">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="flex flex-col mb-16">
+            <h2 className="font-headline font-black text-4xl text-on-surface tracking-tighter mb-4">
+              Smart Solutions
+            </h2>
+            <div className="w-24 h-1.5 bg-tech-green rounded-full"></div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-auto lg:h-[600px]">
+            <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-10 flex flex-col justify-end relative overflow-hidden group card-hover reveal-up">
+              <div className="absolute top-0 right-0 p-12">
+                <span className="material-symbols-outlined text-tech-green text-8xl opacity-10 group-hover:opacity-20 transition-opacity">sensors</span>
+              </div>
+              <div className="relative z-10">
+                <div className="bg-primary-container text-on-primary-container w-fit px-3 py-1 rounded-lg text-xs font-bold mb-4 uppercase tracking-widest">
+                  IoT Core
+                </div>
+                <h3 className="text-3xl font-headline font-extrabold mb-4">IoT Real-Time Monitoring</h3>
+                <p className="text-on-surface-variant max-w-md mb-8">
+                  Pantau kapasitas tempat sampah secara real-time. Sensor ultrasonik mendeteksi
+                  kepenuhan dan mengirim data langsung ke dashboard pusat untuk optimasi rute armada.
+                </p>
+              </div>
+            </div>
+            <div className="lg:col-span-4 bg-tech-green text-white rounded-xl p-10 flex flex-col items-center justify-center text-center card-hover reveal-up delay-1">
+              <span className="material-symbols-outlined text-7xl mb-6">robot_2</span>
+              <h3 className="text-2xl font-headline font-extrabold mb-4">Automated Sorting</h3>
+              <p className="opacity-90 font-medium mb-8">
+                Teknologi Computer Vision memisahkan sampah organik, anorganik, dan residu secara otomatis dalam hitungan milidetik.
+              </p>
+              <a className="bg-white text-tech-green px-6 py-3 rounded-xl font-bold hover:shadow-lg transition-all" href="/register">
+                Explore Tech
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" className="py-24 bg-surface-container-low overflow-hidden">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <div className="reveal-left">
+              <h2 className="font-headline font-black text-4xl text-on-surface tracking-tighter mb-8 leading-tight">
+                How Our Smart Bins Work:
+                <br />
+                <span className="text-tech-green">Efficiency Meets Intelligence</span>
+              </h2>
+              <p className="text-on-surface-variant">
+                Platform ini menghubungkan data lapangan, dashboard analitik, dan partisipasi warga dalam satu alur yang konsisten.
+              </p>
+            </div>
+            <div className="relative bg-surface-container-lowest p-6 rounded-3xl shadow-2xl overflow-hidden card-hover reveal-right delay-1">
+              <div className="rounded-2xl w-full min-h-[320px] bg-gradient-to-br from-primary-container/60 via-surface-container-low to-surface-container-high flex items-center justify-center">
+                <span className="material-symbols-outlined text-tech-green text-9xl float-soft">compost</span>
               </div>
             </div>
           </div>
-          <div>
-            <button onClick={() => fetchUsers()} className="refresh-btn text-sm text-black">Refresh</button>
-          </div>
-        </header>
-
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-1 app-card highlight-card rounded-xl p-6">
-            <h2 className="text-lg font-medium mb-4 text-black">{editingId ? 'Edit User' : 'Create User'}</h2>
-            {error && <div className="text-sm text-red-600 mb-3">{error}</div>}
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="block text-sm text-black mb-1">Name</label>
-                <input ref={nameInputRef} className="w-full text-black bg-white border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-300" value={name} onChange={e => setName(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm text-black mb-1">Email</label>
-                <input className="w-full text-black bg-white border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-300" value={email} onChange={e => setEmail(e.target.value)} />
-              </div>
-              <div className="flex items-center gap-2">
-                <button type="submit" className="btn-primary inline-flex items-center gap-2">
-                  {editingId ? 'Update' : 'Create'}
-                </button>
-                {editingId && (
-                  <button type="button" onClick={() => { setEditingId(null); setName(''); setEmail('') }} className="px-3 py-2 rounded-md border text-black">
-                    Cancel
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-
-          <div className="lg:col-span-2 app-card rounded-xl p-6 overflow-x-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-black">Users</h2>
-              <div className="text-sm text-black">{users.length} users</div>
-            </div>
-
-            {loading ? (
-              <div className="py-12 text-center text-black">Loading...</div>
-            ) : users.length === 0 ? (
-              <div className="py-12 text-center text-black flex flex-col items-center">
-                <svg className="empty-illustration mb-4" width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                  <rect x="0" y="0" width="96" height="96" rx="20" fill="#FFF7F1" />
-                  <path d="M48 26C40.268 26 34 32.268 34 40C34 47.732 40.268 54 48 54C55.732 54 62 47.732 62 40C62 32.268 55.732 26 48 26Z" fill="#FEE6D6"/>
-                  <path d="M48 58C34 58 24 66 24 76H72C72 66 62 58 48 58Z" fill="#FFEFE1"/>
-                  <path d="M66 38L48 56L30 38" stroke="#F97316" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <div className="text-lg text-black mb-4">No users yet</div>
-                <button className="btn-primary" onClick={() => { setEditingId(null); setName(''); setEmail(''); nameInputRef.current?.focus(); }}>Create first user</button>
-              </div>
-            ) : (
-              <table className="w-full table-auto">
-                <thead>
-                  <tr className="bg-orange-100 text-black">
-                    <th className="text-left px-4 py-2">ID</th>
-                    <th className="text-left px-4 py-2">Name</th>
-                    <th className="text-left px-4 py-2">Email</th>
-                    <th className="text-left px-4 py-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {users.map(u => (
-                    <tr key={u.id} className="hover:bg-orange-50">
-                      <td className="px-4 py-3 text-sm text-black">{u.id}</td>
-                      <td className="px-4 py-3 text-sm text-black">{u.name}</td>
-                      <td className="px-4 py-3 text-sm text-black">{u.email}</td>
-                      <td className="px-4 py-3 text-sm">
-                        <button className="text-orange-600 hover:underline mr-3" onClick={() => startEdit(u)}>Edit</button>
-                        <button className="text-red-600 hover:underline" onClick={() => handleDelete(u.id)}>Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
-  )
-
+  );
 }

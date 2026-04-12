@@ -2,6 +2,13 @@ require('dotenv').config();
 const express = require('express')
 const cors = require('cors')
 const usersRouter = require('./routes/users')
+const authRouter = require('./routes/auth')
+const adminRouter = require('./routes/admin')
+const depositsRouter = require('./routes/deposits')
+const categoriesRouter = require('./routes/categories')
+const { authRequired } = require('./middlewares/authMiddleware')
+const adminOnly = require('./middlewares/adminOnly')
+const migrate = require('./migrate')
 
 const app = express()
 app.use(cors())
@@ -14,6 +21,10 @@ app.use((req, res, next) => {
 })
 
 app.use('/api/users', usersRouter)
+app.use('/api/auth', authRouter)
+app.use('/api/categories', categoriesRouter)
+app.use('/api/deposits', depositsRouter)
+app.use('/api/admin', authRequired, adminOnly, adminRouter)
 
 const http = require('http')
 const START_PORT = process.env.PORT ? Number(process.env.PORT) : 4000
@@ -39,4 +50,14 @@ async function startServer(port, attemptsLeft = 10) {
 	server.listen(port, () => console.log(`Backend listening on http://localhost:${port}`))
 }
 
-startServer(START_PORT)
+async function bootstrap() {
+	try {
+		await migrate()
+		await startServer(START_PORT)
+	} catch (err) {
+		console.error('Failed to bootstrap backend:', err)
+		process.exit(1)
+	}
+}
+
+bootstrap()

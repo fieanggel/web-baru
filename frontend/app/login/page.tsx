@@ -56,7 +56,7 @@ export default function LoginPage() {
                 Digital Ecology
               </span>
               <h1 className="text-4xl lg:text-6xl font-black text-on-primary tracking-tight leading-tight mb-6">
-                Veridian Ledger
+                EcoNexa by Difie Anggely 152023186
               </h1>
               <p className="text-xl lg:text-2xl text-on-primary/90 font-headline font-light leading-relaxed">
                 Environmental Stewardship through Data.
@@ -77,7 +77,7 @@ export default function LoginPage() {
 
         <section className="flex-1 h-full flex flex-col justify-center items-center p-8 lg:p-24 bg-surface-container-lowest overflow-hidden reveal-right">
           <div className="md:hidden mb-12 text-center reveal-up">
-            <h1 className="text-3xl font-black text-primary tracking-tighter">Veridian Ledger</h1>
+            <h1 className="text-3xl font-black text-primary tracking-tighter">EcoNexa by Difie Anggely 152023186</h1>
             <p className="text-on-surface-variant text-sm mt-2">
               Environmental Stewardship through Data
             </p>
@@ -184,7 +184,7 @@ export default function LoginPage() {
 
           <footer className="mt-auto pt-12 text-center reveal-up delay-4">
             <p className="text-[10px] uppercase tracking-widest text-outline font-bold">
-              © 2024 Veridian Ledger. Environmental Stewardship through Data.
+              © 2024 EcoNexa by Difie Anggely 152023186. Environmental Stewardship through Data.
             </p>
           </footer>
         </section>

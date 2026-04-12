@@ -81,7 +81,7 @@ export default function RegisterPage() {
           <div className="h-full w-full max-w-md mx-auto flex flex-col justify-start px-8 lg:px-24 pt-12 pb-10 overflow-y-auto no-scrollbar">
             <div className="md:hidden mb-12 text-center reveal-up">
               <h1 className="text-3xl font-black text-primary tracking-tighter">
-                Revolusi Kelola Sampah
+                EcoNexa by Difie Anggely 152023186
               </h1>
               <p className="text-on-surface-variant text-sm mt-2">
                 Environmental Stewardship through Data
@@ -192,7 +192,7 @@ export default function RegisterPage() {
 
             <footer className="mt-auto pt-12 text-center reveal-up delay-4">
               <p className="text-[10px] uppercase tracking-widest text-outline font-bold">
-                © 2024 Veridian Ledger. Environmental Stewardship through Data.
+                © 2024 EcoNexa by Difie Anggely 152023186. Environmental Stewardship through Data.
               </p>
             </footer>
           </div>

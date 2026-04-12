@@ -16,7 +16,7 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "EcoNexa by Difie Anggely 152023186",
-  description: "EcoIntelligence dashboard and waste tracking UI",
+  description: "EcoNexa dashboard and waste tracking UI",
 };
 
 export default function RootLayout({

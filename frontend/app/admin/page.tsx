@@ -352,7 +352,7 @@ export default function AdminPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-green-900 dark:text-green-100 font-headline">
-                EcoAdmin
+                EcoNexa by Difie Anggely 152023186
               </h1>
               <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
                 Digital Ecologist Framework

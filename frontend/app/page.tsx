@@ -4,7 +4,7 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 glass-nav shadow-sm reveal-up">
         <div className="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
           <div className="text-xl font-black text-green-700 tracking-tighter font-headline">
-            EcoNexa by Difie Anggely 152023167
+            EcoNexa by Difie Anggely 152023186
           </div>
           <div className="hidden md:flex gap-8 items-center">
             <a className="text-green-700 border-b-2 border-green-700 pb-1 font-medium" href="#hero">

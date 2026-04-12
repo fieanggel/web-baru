@@ -324,7 +324,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold tracking-tighter text-green-900 dark:text-green-200">
-                  Veridian Ledger
+                  EcoNexa by Difie Anggely 152023186
                 </h1>
                 <p className="text-[10px] uppercase tracking-widest text-primary opacity-70 font-bold">
                   Sustainable Intelligence
@@ -400,7 +400,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="hidden md:block text-lg font-black text-green-900 font-manrope">
-            Veridian Ledger
+            EcoNexa by Difie Anggely 152023186
           </div>
 
           <div className="flex items-center gap-4 md:gap-6 w-auto lg:w-1/3 justify-end">
@@ -414,7 +414,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 pl-3 md:pl-4 border-l border-slate-200">
               <div className="hidden sm:block text-right">
                 <p className="text-xs font-bold text-on-surface">
-                  {viewer?.name ?? "Veridian Member"}
+                  {viewer?.name ?? "EcoNexa Member"}
                 </p>
                 <p className="text-[10px] text-primary font-semibold">{viewer?.email ?? "-"}</p>
               </div>

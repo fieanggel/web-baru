@@ -15,7 +15,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "EcoIntelligence",
+  title: "EcoNexa by Difie Anggely 152023186",
   description: "EcoIntelligence dashboard and waste tracking UI",
 };
 

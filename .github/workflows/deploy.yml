@@ -8,7 +8,7 @@ on:
 env:
   FRONTEND_IMAGE: raelqiansyah/fedifie
   BACKEND_IMAGE: raelqiansyah/bedifie
-  FRONTEND_API_BASE_URL: http://54.236.243.181:4000
+  FRONTEND_API_BASE_URL: /api
 
 jobs:
   build:
@@ -67,8 +67,8 @@ jobs:
           script: |
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
             cd /home/ubuntu/web-baru/deployment/ec2-fe
-            docker-compose pull
-            docker-compose up -d
+            docker compose pull
+            docker compose up -d --build
 
   deploy-be:
     name: Deploy Backend To BE EC2
@@ -83,11 +83,16 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         with:
           host: ${{ secrets.EC2_BE_HOST }}
+          port: 22
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          proxy_host: ${{ secrets.EC2_FE_HOST }}
+          proxy_port: 22
+          proxy_username: ${{ secrets.EC2_USERNAME }}
+          proxy_key: ${{ secrets.EC2_SSH_KEY }}
           envs: DOCKER_USERNAME,DOCKER_PASSWORD
           script: |
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
             cd /home/ubuntu/web-baru/deployment/ec2-be
-            docker-compose pull
-            docker-compose up -d
+            docker compose pull
+            docker compose up -d

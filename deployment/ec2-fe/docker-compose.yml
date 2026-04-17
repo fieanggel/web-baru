@@ -1,6 +1,10 @@
 services:
   frontend:
-    image: ${DOCKERHUB_USERNAME:-raelqiansyah}/fedifie:${IMAGE_TAG:-latest}
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: /api
     container_name: fedifie-frontend
     restart: unless-stopped
     environment:

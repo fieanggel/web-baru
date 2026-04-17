@@ -111,5 +111,4 @@ jobs:
             git pull origin main
 
             cd deployment/ec2-fe
-            docker compose pull frontend
             docker compose up -d --build --force-recreate

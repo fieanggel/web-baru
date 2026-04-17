@@ -23,6 +23,7 @@ export type UserDeposit = {
   estimatedWeight: number;
   actualWeight: number | null;
   pointsEarned: number;
+  reportPhotoUrl: string | null;
   status: "PENDING" | "VERIFIED" | "REJECTED";
   date: string;
   createdAt: string;
@@ -36,6 +37,7 @@ export type CreatedDeposit = {
   estimatedWeight: number;
   actualWeight: number | null;
   pointsEarned: number;
+  reportPhotoUrl: string | null;
   status: "PENDING" | "VERIFIED" | "REJECTED";
   createdAt: string;
 };
@@ -68,6 +70,12 @@ export type RegisterPayload = {
   name: string;
   email: string;
   password: string;
+};
+
+export type UploadedPhoto = {
+  url: string;
+  key: string;
+  bucket: string;
 };
 
 export class ApiError extends Error {
@@ -120,6 +128,10 @@ export function getUserFriendlyError(error: unknown, fallback: string) {
   if (status === 422 || status === 400) {
     if (message.includes("weight")) {
       return "Berat tidak valid. Isi angka yang benar dan lebih dari 0.";
+    }
+
+    if (message.includes("photo") || message.includes("image") || message.includes("reportphotourl")) {
+      return "Foto bukti wajib diunggah terlebih dahulu.";
     }
 
     if (message.includes("email") || message.includes("password")) {
@@ -211,8 +223,47 @@ export const categoriesApi = {
   },
 };
 
+export const uploadApi = {
+  async uploadPhoto(file: File, token?: string) {
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    const response = await fetch(`${API_BASE_URL}/api/upload`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      body: formData,
+    });
+
+    const body = await response.text();
+    let payload: ApiResponse<UploadedPhoto> | null = null;
+
+    if (body) {
+      try {
+        payload = JSON.parse(body) as ApiResponse<UploadedPhoto>;
+      } catch {
+        payload = null;
+      }
+    }
+
+    if (!response.ok) {
+      const message =
+        payload?.error || payload?.message || `Request failed with status ${response.status}`;
+      throw new ApiError(message, response.status);
+    }
+
+    if (!payload?.data?.url) {
+      throw new ApiError("Server returned an invalid upload response", response.status);
+    }
+
+    return payload.data;
+  },
+};
+
 export const depositsApi = {
-  async create(token: string, payload: { categoryId: number; estimatedWeight: number }) {
+  async create(
+    token: string,
+    payload: { categoryId: number; estimatedWeight: number; reportPhotoUrl?: string },
+  ) {
     const response = await requestJson<{ success: true; data: CreatedDeposit }>("/api/deposits", {
       method: "POST",
       token,

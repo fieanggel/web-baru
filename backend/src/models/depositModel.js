@@ -1,11 +1,13 @@
 const { randomUUID } = require('crypto')
 const pool = require('../db')
 
-async function createDeposit({ userId, categoryId, estimatedWeight }, conn = pool) {
+async function createDeposit({ userId, categoryId, estimatedWeight, reportPhotoUrl = null }, conn = pool) {
   const id = randomUUID()
   await conn.query(
-    'INSERT INTO deposits (id, user_id, category_id, estimated_weight, status) VALUES (?, ?, ?, ?, ?)',
-    [id, userId, categoryId, estimatedWeight, 'PENDING'],
+    `INSERT INTO deposits
+       (id, user_id, category_id, estimated_weight, report_photo_url, status)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [id, userId, categoryId, estimatedWeight, reportPhotoUrl, 'PENDING'],
   )
 
   return getById(id, conn)
@@ -14,6 +16,7 @@ async function createDeposit({ userId, categoryId, estimatedWeight }, conn = poo
 async function getById(id, conn = pool) {
   const [rows] = await conn.query(
     `SELECT d.id, d.user_id, d.category_id, d.estimated_weight, d.actual_weight, d.points_earned,
+            d.report_photo_url,
             d.status, d.created_at, d.updated_at,
             u.name AS user_name, u.email AS user_email,
             c.name AS category_name, c.price_per_kg
@@ -45,6 +48,7 @@ async function listMonitoringQueue(limit = 50, conn = pool) {
   const safeLimit = Math.max(1, Math.min(200, Number(limit) || 50))
   const [rows] = await conn.query(
     `SELECT d.id, d.user_id, d.category_id, d.estimated_weight, d.actual_weight, d.points_earned,
+            d.report_photo_url,
             d.status, d.created_at,
             u.name AS user_name,
             c.name AS category_name
@@ -62,6 +66,7 @@ async function listMonitoringQueue(limit = 50, conn = pool) {
 async function listByUser(userId, conn = pool) {
   const [rows] = await conn.query(
     `SELECT d.id, d.user_id, d.category_id, d.estimated_weight, d.actual_weight, d.points_earned,
+            d.report_photo_url,
             d.status, d.created_at, d.updated_at,
             c.name AS category_name, c.price_per_kg
      FROM deposits d

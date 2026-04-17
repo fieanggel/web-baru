@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  frontend:
+    image: ${DOCKERHUB_USERNAME:-raelqiansyah}/fedifie:${IMAGE_TAG:-latest}
+    container_name: fedifie-frontend
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+    ports:
+      - "80:3000"

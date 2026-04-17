@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  backend:
+    image: ${DOCKERHUB_USERNAME:-raelqiansyah}/bedifie:${IMAGE_TAG:-latest}
+    container_name: bedifie-backend
+    restart: unless-stopped
+    environment:
+      - PORT=4000
+      - DB_HOST=${DB_HOST:-127.0.0.1}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-}
+      - DB_NAME=${DB_NAME:-user_crud}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://3.235.51.107}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-bucket-difie}
+    ports:
+      - "4000:4000"

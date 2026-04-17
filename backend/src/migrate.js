@@ -63,6 +63,12 @@ async function migrate() {
       'updated_at',
       '`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
     )
+    await ensureColumnInTable(
+      conn,
+      'deposits',
+      'report_photo_url',
+      '`report_photo_url` TEXT DEFAULT NULL',
+    )
 
     console.log('Migration applied successfully.')
   } finally {

@@ -6,12 +6,30 @@ const authRouter = require('./routes/auth')
 const adminRouter = require('./routes/admin')
 const depositsRouter = require('./routes/deposits')
 const categoriesRouter = require('./routes/categories')
+const uploadRouter = require('./routes/upload')
 const { authRequired } = require('./middlewares/authMiddleware')
 const adminOnly = require('./middlewares/adminOnly')
 const migrate = require('./migrate')
 
 const app = express()
-app.use(cors())
+
+const allowedOrigins = (process.env.CORS_ORIGIN || '*')
+	.split(',')
+	.map(item => item.trim())
+	.filter(Boolean)
+
+app.use(
+	cors({
+		origin: (origin, callback) => {
+			if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+				callback(null, true)
+				return
+			}
+
+			callback(new Error('Not allowed by CORS'))
+		},
+	}),
+)
 app.use(express.json())
 
 // Debug: log incoming requests and bodies to help trace frontend requests
@@ -24,6 +42,7 @@ app.use('/api/users', usersRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/categories', categoriesRouter)
 app.use('/api/deposits', depositsRouter)
+app.use('/api/upload', uploadRouter)
 app.use('/api/admin', authRequired, adminOnly, adminRouter)
 
 const http = require('http')

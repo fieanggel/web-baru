@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   ApiError,
   categoriesApi,
@@ -10,8 +10,11 @@ import {
   getUserFriendlyError,
   type Category,
   type UserDeposit,
+  uploadApi,
 } from "@/lib/api";
 import { clearSession, getToken, getUser, type SessionUser } from "@/lib/auth";
+
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 const ROUTES = {
   dashboard: "/dashboard",
@@ -108,16 +111,20 @@ function getStatusLabel(status: UserDeposit["status"]) {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
   const [viewer, setViewer] = useState<SessionUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [deposits, setDeposits] = useState<UserDeposit[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [estimatedWeight, setEstimatedWeight] = useState<string>("");
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     const sessionToken = getToken();
@@ -180,6 +187,20 @@ export default function DashboardPage() {
       active = false;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (!selectedPhoto) {
+      setPhotoPreviewUrl(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedPhoto);
+    setPhotoPreviewUrl(previewUrl);
+
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [selectedPhoto]);
 
   const selectedCategory = useMemo(
     () => categories.find((category) => category.id === selectedCategoryId) ?? null,
@@ -257,6 +278,33 @@ export default function DashboardPage() {
     setDeposits(latestDeposits);
   }
 
+  function handleSelectPhoto(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setError(null);
+    setSubmitMessage(null);
+
+    if (!file) {
+      setSelectedPhoto(null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setSelectedPhoto(null);
+      event.target.value = "";
+      setError("Foto harus berupa file gambar (image).");
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setSelectedPhoto(null);
+      event.target.value = "";
+      setError("Ukuran foto maksimal 5 MB.");
+      return;
+    }
+
+    setSelectedPhoto(file);
+  }
+
   async function handleCreateDeposit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -278,16 +326,31 @@ export default function DashboardPage() {
       return;
     }
 
+    if (!selectedPhoto) {
+      setError("Foto bukti wajib diunggah sebelum submit.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
+      setUploadingPhoto(true);
+      const uploadedPhoto = await uploadApi.uploadPhoto(selectedPhoto, token);
+
       await depositsApi.create(token, {
         categoryId: selectedCategoryId,
         estimatedWeight: parsedWeight,
+        reportPhotoUrl: uploadedPhoto.url,
       });
 
       await refreshDeposits(token);
       setEstimatedWeight("");
+      setSelectedPhoto(null);
+
+      if (photoInputRef.current) {
+        photoInputRef.current.value = "";
+      }
+
       setSubmitMessage("Deposit berhasil dikirim. Menunggu verifikasi admin.");
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
@@ -298,6 +361,7 @@ export default function DashboardPage() {
 
       setError(getUserFriendlyError(err, "Tidak bisa mengirim deposit saat ini."));
     } finally {
+      setUploadingPhoto(false);
       setSubmitting(false);
     }
   }
@@ -591,6 +655,34 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-bold text-secondary mb-3 ml-1">
+                    Foto Bukti (Wajib)
+                  </label>
+                  <div className="rounded-2xl border border-dashed border-outline-variant/40 bg-surface-container-highest/70 p-4">
+                    <input
+                      accept="image/*"
+                      className="block w-full text-sm text-on-surface file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:font-bold file:text-on-primary hover:file:opacity-90"
+                      onChange={handleSelectPhoto}
+                      ref={photoInputRef}
+                      type="file"
+                    />
+                    <p className="mt-2 text-xs text-secondary">
+                      Unggah foto sampah sebelum submit. Format gambar, maksimal 5 MB.
+                    </p>
+                  </div>
+
+                  {photoPreviewUrl ? (
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface">
+                      <img
+                        alt="Preview foto sampah"
+                        className="h-44 w-full object-cover"
+                        src={photoPreviewUrl}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+
                 <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center justify-between">
                   <span className="text-sm font-semibold text-primary-dim">Estimated Reward</span>
                   <span className="text-xl font-bold text-primary font-manrope">
@@ -600,10 +692,10 @@ export default function DashboardPage() {
 
                 <button
                   className="block text-center w-full py-5 bg-primary text-on-primary rounded-2xl font-black tracking-tight text-lg shadow-xl shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-60"
-                  disabled={submitting || loading || !categories.length}
+                  disabled={submitting || uploadingPhoto || loading || !categories.length || !selectedPhoto}
                   type="submit"
                 >
-                  {submitting ? "Submitting..." : "Submit Deposit"}
+                  {uploadingPhoto ? "Uploading photo..." : submitting ? "Submitting..." : "Submit Deposit"}
                 </button>
               </form>
             </div>
@@ -647,12 +739,13 @@ export default function DashboardPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-separate border-spacing-y-4 min-w-[760px]">
+              <table className="w-full text-left border-separate border-spacing-y-4 min-w-[860px]">
                 <thead>
                   <tr className="text-outline text-[10px] font-black uppercase tracking-widest px-4">
                     <th className="pb-2 pl-8">Date</th>
                     <th className="pb-2">Waste Type</th>
                     <th className="pb-2">Weight</th>
+                    <th className="pb-2">Photo</th>
                     <th className="pb-2">Points</th>
                     <th className="pb-2 text-center">Status</th>
                     <th className="pb-2 pr-8 text-right">Actions</th>
@@ -689,6 +782,21 @@ export default function DashboardPage() {
                           <span className="text-sm font-bold">
                             {formatWeight(entry.actualWeight ?? entry.estimatedWeight)}
                           </span>
+                        </td>
+
+                        <td className="py-5">
+                          {entry.reportPhotoUrl ? (
+                            <a
+                              className="text-xs font-bold text-primary hover:underline"
+                              href={entry.reportPhotoUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              Lihat Foto
+                            </a>
+                          ) : (
+                            <span className="text-xs text-outline">-</span>
+                          )}
                         </td>
 
                         <td className="py-5">

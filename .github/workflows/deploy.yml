@@ -27,10 +27,10 @@ jobs:
         with:
           host: ${{ env.BE_PRIVATE_IP }}
           username: ${{ env.EC2_USER }}
-          key: ${{ secrets.EC2_PEM_KEY }}
+          key: ${{ secrets.EC2_PEM_KEY || secrets.EC2_SSH_KEY }}
           proxy_host: ${{ env.FE_PUBLIC_IP }}
           proxy_username: ${{ env.EC2_USER }}
-          proxy_key: ${{ secrets.EC2_PEM_KEY }}
+          proxy_key: ${{ secrets.EC2_PEM_KEY || secrets.EC2_SSH_KEY }}
           envs: DB_PASSWORD,REPO_DIR,REPO_URL,RDS_HOST,FE_PUBLIC_IP
           script: |
             set -e
@@ -47,7 +47,7 @@ jobs:
               echo "DB_PORT=3306"
               echo "DB_USER=admin"
               echo "DB_PASSWORD=${DB_PASSWORD}"
-              echo "DB_NAME=user_crud"
+              echo "DB_NAME=dbdifie"
               echo "PORT=4000"
               echo "JWT_SECRET=replace-with-strong-secret"
               echo "JWT_EXPIRES_IN=7d"
@@ -71,7 +71,7 @@ jobs:
         with:
           host: ${{ env.FE_PUBLIC_IP }}
           username: ${{ env.EC2_USER }}
-          key: ${{ secrets.EC2_PEM_KEY }}
+          key: ${{ secrets.EC2_PEM_KEY || secrets.EC2_SSH_KEY }}
           envs: REPO_DIR,REPO_URL
           script: |
             set -e

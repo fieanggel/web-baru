@@ -135,6 +135,16 @@ export function getUserFriendlyError(error: unknown, fallback: string) {
     return "Data yang diminta tidak ditemukan.";
   }
 
+  if (
+    status === 504 ||
+    message.includes("gateway") ||
+    message.includes("timed out") ||
+    message.includes("timeout") ||
+    message.includes("upstream")
+  ) {
+    return "Upload ke server sedang timeout. Coba lagi dengan foto lebih kecil atau beberapa saat lagi.";
+  }
+
   if (status === 409) {
     return "Data sudah digunakan. Coba gunakan data lain.";
   }

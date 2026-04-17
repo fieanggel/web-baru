@@ -3,6 +3,8 @@ services:
     image: ${DOCKERHUB_USERNAME:-raelqiansyah}/fedifie:${IMAGE_TAG:-latest}
     container_name: fedifie-frontend
     restart: unless-stopped
+    cpus: "0.70"
+    mem_limit: 512m
     environment:
       - PORT=3000
     expose:
@@ -14,6 +16,8 @@ services:
     image: nginx:1.27-alpine
     container_name: fedifie-nginx
     restart: unless-stopped
+    cpus: "0.30"
+    mem_limit: 128m
     depends_on:
       - frontend
     ports:

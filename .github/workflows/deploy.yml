@@ -152,7 +152,7 @@ jobs:
               echo "AWS_REGION=${AWS_REGION_CLEAN}"
               echo "AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME_CLEAN}"
               echo "S3_UPLOAD_TIMEOUT_MS=20000"
-              echo "UPLOAD_STORAGE_MODE=auto"
+              echo "UPLOAD_STORAGE_MODE=local"
               echo "LOCAL_UPLOAD_FALLBACK_ENABLED=true"
               echo "LOCAL_UPLOAD_ROOT=/app/uploads"
               echo "S3_CIRCUIT_BREAKER_MS=300000"

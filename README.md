@@ -16,8 +16,8 @@ Proyek ini berisi 3 service utama:
 Backend membuat akun seed admin saat proses migrasi/startup.
 
 - Nama default: Administrator
-- Email default: admin@bedifie.local
-- Password default: Admin12345!
+- Email default: admin@gmail.com
+- Password default: admin123
 - Role: ADMIN
 
 Variabel environment untuk mengatur akun seed:

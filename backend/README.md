@@ -30,8 +30,8 @@ PORT=4000
 JWT_SECRET=replace-this-with-a-strong-secret
 JWT_EXPIRES_IN=7d
 ADMIN_SEED_NAME=Administrator
-ADMIN_SEED_EMAIL=admin@bedifie.local
-ADMIN_SEED_PASSWORD=Admin12345!
+ADMIN_SEED_EMAIL=admin@gmail.com
+ADMIN_SEED_PASSWORD=admin123
 ADMIN_SEED_FORCE_PASSWORD_RESET=false
 
 AWS_ACCESS_KEY_ID=...
@@ -55,8 +55,8 @@ Saat server start, backend akan otomatis menjalankan migrasi database dan seed a
 
 Default akun seed admin:
 
-- Email: `admin@bedifie.local`
-- Password: `Admin12345!`
+- Email: `admin@gmail.com`
+- Password: `admin123`
 
 Sangat disarankan mengganti `ADMIN_SEED_PASSWORD` di environment produksi.
 

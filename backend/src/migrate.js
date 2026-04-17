@@ -57,8 +57,8 @@ async function ensureColumnInTable(conn, tableName, columnName, columnDefinition
 
 async function ensureAdminSeed(conn) {
   const adminName = String(process.env.ADMIN_SEED_NAME || 'Administrator').trim() || 'Administrator'
-  const adminEmail = normalizeEmail(process.env.ADMIN_SEED_EMAIL || 'admin@bedifie.local')
-  const adminPassword = String(process.env.ADMIN_SEED_PASSWORD || 'Admin12345!')
+  const adminEmail = normalizeEmail(process.env.ADMIN_SEED_EMAIL || 'admin@gmail.com')
+  const adminPassword = String(process.env.ADMIN_SEED_PASSWORD || 'admin123')
   const forcePasswordReset = process.env.ADMIN_SEED_FORCE_PASSWORD_RESET === 'true'
 
   const passwordHash = hashPassword(adminPassword)

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express')
 const cors = require('cors')
+const path = require('path')
 const usersRouter = require('./routes/users')
 const authRouter = require('./routes/auth')
 const adminRouter = require('./routes/admin')
@@ -31,6 +32,12 @@ app.use(
 	}),
 )
 app.use(express.json())
+
+const localUploadRoot = (process.env.LOCAL_UPLOAD_ROOT || '').trim()
+	? path.resolve((process.env.LOCAL_UPLOAD_ROOT || '').trim())
+	: path.resolve(process.cwd(), 'uploads')
+
+app.use('/api/uploads', express.static(localUploadRoot))
 
 // Debug: log incoming requests and bodies to help trace frontend requests
 app.use((req, res, next) => {

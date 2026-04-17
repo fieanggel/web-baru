@@ -15,6 +15,9 @@ import {
 import { clearSession, getToken, getUser, type SessionUser } from "@/lib/auth";
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const IMAGE_COMPRESSION_THRESHOLD_BYTES = 1.5 * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 1600;
+const JPEG_QUALITY = 0.82;
 
 const ROUTES = {
   dashboard: "/dashboard",
@@ -107,6 +110,65 @@ function getStatusLabel(status: UserDeposit["status"]) {
   }
 
   return "Pending";
+}
+
+function loadImageFromFile(file: File) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Failed to load image"));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+async function compressImageIfNeeded(file: File) {
+  if (!file.type.startsWith("image/") || file.size <= IMAGE_COMPRESSION_THRESHOLD_BYTES) {
+    return file;
+  }
+
+  try {
+    const image = await loadImageFromFile(file);
+    const ratio = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(image.width, image.height));
+    const width = Math.max(1, Math.round(image.width * ratio));
+    const height = Math.max(1, Math.round(image.height * ratio));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return file;
+    }
+
+    ctx.drawImage(image, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY);
+    });
+
+    if (!blob || blob.size >= file.size) {
+      return file;
+    }
+
+    const fileName = `${file.name.replace(/\.[^.]+$/, "")}.jpg`;
+    return new File([blob], fileName, {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+  } catch {
+    return file;
+  }
 }
 
 export default function DashboardPage() {
@@ -335,7 +397,8 @@ export default function DashboardPage() {
 
     try {
       setUploadingPhoto(true);
-      const uploadedPhoto = await uploadApi.uploadPhoto(selectedPhoto, token);
+      const fileForUpload = await compressImageIfNeeded(selectedPhoto);
+      const uploadedPhoto = await uploadApi.uploadPhoto(fileForUpload, token);
 
       await depositsApi.create(token, {
         categoryId: selectedCategoryId,

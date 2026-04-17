@@ -62,6 +62,10 @@ jobs:
             git pull origin main
 
             cd deployment/ec2-be
+            AWS_ACCESS_KEY_ID_CLEAN="$(printf '%s' "${AWS_ACCESS_KEY_ID}" | tr -d '\r\n')"
+            AWS_SECRET_ACCESS_KEY_CLEAN="$(printf '%s' "${AWS_SECRET_ACCESS_KEY}" | tr -d '\r\n')"
+            AWS_REGION_CLEAN="$(printf '%s' "${AWS_REGION:-us-east-1}" | tr -d '\r\n')"
+            AWS_S3_BUCKET_NAME_CLEAN="$(printf '%s' "${AWS_S3_BUCKET_NAME}" | tr -d '\r\n')"
             {
               echo "DB_HOST=${RDS_HOST}"
               echo "DB_PORT=3306"
@@ -76,10 +80,10 @@ jobs:
               echo "ADMIN_SEED_PASSWORD=${ADMIN_SEED_PASSWORD:-Admin12345!}"
               echo "ADMIN_SEED_FORCE_PASSWORD_RESET=false"
               echo "CORS_ORIGIN=http://${FE_PUBLIC_IP}"
-              echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}"
-              echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
-              echo "AWS_REGION=${AWS_REGION:-us-east-1}"
-              echo "AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}"
+              echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_CLEAN}"
+              echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_CLEAN}"
+              echo "AWS_REGION=${AWS_REGION_CLEAN}"
+              echo "AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME_CLEAN}"
             } > .env
 
             docker compose up --build -d

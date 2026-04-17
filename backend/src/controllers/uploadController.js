@@ -77,7 +77,13 @@ async function uploadPhoto(req, res) {
       },
     })
   } catch (err) {
-    console.error('S3 upload failed:', err)
+    const { bucketName, region } = getS3Config()
+    console.error('S3 upload failed:', {
+      name: err?.name,
+      message: err?.message,
+      bucketName,
+      region,
+    })
     return res.status(500).json({ success: false, error: 'Failed to upload file to S3' })
   }
 }

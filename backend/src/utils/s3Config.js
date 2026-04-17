@@ -14,13 +14,20 @@ function readEnv(name) {
     return ''
   }
 
-  const cleaned = String(rawValue).trim()
+  let cleaned = String(rawValue)
+    .replace(/\\[rnt]/g, '')
+    .replace(/[\r\n\t]/g, '')
+    .trim()
 
   if (
     (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
     (cleaned.startsWith("'") && cleaned.endsWith("'"))
   ) {
-    return cleaned.slice(1, -1).trim()
+    cleaned = cleaned
+      .slice(1, -1)
+      .replace(/\\[rnt]/g, '')
+      .replace(/[\r\n\t]/g, '')
+      .trim()
   }
 
   return cleaned
@@ -30,7 +37,7 @@ function getS3Config() {
   return {
     accessKeyId: readEnv('AWS_ACCESS_KEY_ID'),
     secretAccessKey: readEnv('AWS_SECRET_ACCESS_KEY'),
-    region: readEnv('AWS_REGION') || 'ap-southeast-1',
+    region: readEnv('AWS_REGION') || 'us-east-1',
     bucketName: readEnv('AWS_S3_BUCKET_NAME'),
   }
 }

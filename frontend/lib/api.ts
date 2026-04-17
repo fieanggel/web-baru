@@ -66,6 +66,7 @@ export type AdminQueueItem = {
   id: string;
   userName: string;
   wasteType: string;
+  reportPhotoUrl: string | null;
   weight: number;
   estimatedWeight: number;
   actualWeight: number | null;

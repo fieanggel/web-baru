@@ -575,11 +575,12 @@ export default function AdminPage() {
               <span className="text-xs font-bold text-primary">{filteredQueue.length} rows</span>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left min-w-[780px]">
+              <table className="w-full text-left min-w-[920px]">
                 <thead>
                   <tr className="bg-surface-container-low text-secondary text-[11px] uppercase tracking-wider font-bold">
                     <th className="px-6 py-4">User Name</th>
                     <th className="px-6 py-4">Waste Type</th>
+                    <th className="px-6 py-4">Photo</th>
                     <th className="px-6 py-4">Weight (Kg)</th>
                     <th className="px-6 py-4">Date</th>
                     <th className="px-6 py-4">Status</th>
@@ -603,6 +604,25 @@ export default function AdminPage() {
                           <span className={`px-3 py-1 ${getTypeTone(row.wasteType)} text-[10px] font-bold rounded-full`}>
                             {row.wasteType}
                           </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {row.reportPhotoUrl ? (
+                            <a
+                              className="inline-flex items-center gap-2"
+                              href={row.reportPhotoUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                              title={`Open photo for deposit ${row.id}`}
+                            >
+                              <img
+                                alt={`Report photo ${row.id}`}
+                                className="h-14 w-14 rounded-lg border border-outline-variant/20 object-cover"
+                                src={row.reportPhotoUrl}
+                              />
+                            </a>
+                          ) : (
+                            <span className="text-[11px] font-medium text-slate-400">No photo</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-sm font-medium">{row.weight.toFixed(1)} kg</td>
                         <td className="px-6 py-4 text-sm text-slate-500">{row.date}</td>

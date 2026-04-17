@@ -51,6 +51,7 @@ exports.getMonitoringQueue = async (req, res) => {
             : Number(row.actual_weight),
         estimatedWeight: Number(row.estimated_weight || 0),
         actualWeight: row.actual_weight === null ? null : Number(row.actual_weight),
+        reportPhotoUrl: row.report_photo_url || null,
         pointsEarned: Number(row.points_earned || 0),
         date: formatDashboardDate(row.created_at),
         status: row.status,

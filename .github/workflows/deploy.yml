@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH Jump FE -> BE and deploy backend
+      - name: SSH to FE then deploy backend to BE
         uses: appleboy/ssh-action@v1.2.0
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -72,14 +72,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         with:
-          host: ${{ env.BE_PRIVATE_IP }}
+          host: ${{ env.FE_PUBLIC_IP }}
           username: ${{ env.EC2_USER }}
           key: ${{ secrets.EC2_PEM_KEY || secrets.EC2_SSH_KEY }}
-          proxy_host: ${{ env.FE_PUBLIC_IP }}
-          proxy_username: ${{ env.EC2_USER }}
-          proxy_key: ${{ secrets.EC2_PEM_KEY || secrets.EC2_SSH_KEY }}
-          envs: DB_PASSWORD,ADMIN_SEED_PASSWORD,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,AWS_S3_BUCKET_NAME,REPO_DIR,REPO_URL,RDS_HOST,FE_PUBLIC_IP
+          envs: DB_PASSWORD,ADMIN_SEED_PASSWORD,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,AWS_S3_BUCKET_NAME,DOCKERHUB_TOKEN,REPO_DIR,REPO_URL,RDS_HOST,FE_PUBLIC_IP,BE_PRIVATE_IP,EC2_USER,DOCKERHUB_USERNAME
           script: |
             set -e
             if [ -z "${DB_PASSWORD}" ]; then
@@ -97,6 +95,13 @@ jobs:
               exit 1
             fi
 
+            SSH_BE_KEY_PATH="/home/ubuntu/keydifie.pem"
+            if [ ! -f "${SSH_BE_KEY_PATH}" ]; then
+              echo "Missing SSH key on FE: ${SSH_BE_KEY_PATH}. Add the key file to FE host for BE hop." >&2
+              exit 1
+            fi
+            chmod 600 "${SSH_BE_KEY_PATH}"
+
             if [ ! -d "${REPO_DIR}/.git" ]; then
               git clone "${REPO_URL}" "${REPO_DIR}"
             fi
@@ -104,11 +109,25 @@ jobs:
             cd "${REPO_DIR}"
             git pull origin main
 
-            cd deployment/ec2-be
+            if [ -n "${DOCKERHUB_TOKEN}" ]; then
+              echo "${DOCKERHUB_TOKEN}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+            fi
+
+            docker pull "${DOCKERHUB_USERNAME}/bedifie:latest"
+            docker save "${DOCKERHUB_USERNAME}/bedifie:latest" \
+              | ssh -i "${SSH_BE_KEY_PATH}" -o StrictHostKeyChecking=no "${EC2_USER}@${BE_PRIVATE_IP}" "sudo docker load"
+
+            ssh -i "${SSH_BE_KEY_PATH}" -o StrictHostKeyChecking=no "${EC2_USER}@${BE_PRIVATE_IP}" "mkdir -p '${REPO_DIR}/deployment/ec2-be'"
+            scp -i "${SSH_BE_KEY_PATH}" -o StrictHostKeyChecking=no \
+              "${REPO_DIR}/deployment/ec2-be/docker-compose.yml" \
+              "${EC2_USER}@${BE_PRIVATE_IP}:${REPO_DIR}/deployment/ec2-be/docker-compose.yml"
+
             AWS_ACCESS_KEY_ID_CLEAN="$(printf '%s' "${AWS_ACCESS_KEY_ID}" | tr -d '\r\n')"
             AWS_SECRET_ACCESS_KEY_CLEAN="$(printf '%s' "${AWS_SECRET_ACCESS_KEY}" | tr -d '\r\n')"
             AWS_REGION_CLEAN="$(printf '%s' "${AWS_REGION:-us-east-1}" | tr -d '\r\n')"
             AWS_S3_BUCKET_NAME_CLEAN="$(printf '%s' "${AWS_S3_BUCKET_NAME}" | tr -d '\r\n')"
+
+            ENV_TMP_FILE="$(mktemp)"
             {
               echo "DB_HOST=${RDS_HOST}"
               echo "DB_PORT=3306"
@@ -127,10 +146,15 @@ jobs:
               echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_CLEAN}"
               echo "AWS_REGION=${AWS_REGION_CLEAN}"
               echo "AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME_CLEAN}"
-            } > .env
+            } > "${ENV_TMP_FILE}"
 
-            docker compose pull backend
-            docker compose up -d --force-recreate backend
+            scp -i "${SSH_BE_KEY_PATH}" -o StrictHostKeyChecking=no \
+              "${ENV_TMP_FILE}" \
+              "${EC2_USER}@${BE_PRIVATE_IP}:${REPO_DIR}/deployment/ec2-be/.env"
+            rm -f "${ENV_TMP_FILE}"
+
+            ssh -i "${SSH_BE_KEY_PATH}" -o StrictHostKeyChecking=no "${EC2_USER}@${BE_PRIVATE_IP}" \
+              "cd '${REPO_DIR}/deployment/ec2-be' && sudo docker compose up -d --force-recreate backend"
 
   deploy-frontend:
     name: Deploy Frontend

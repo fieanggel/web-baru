@@ -7,8 +7,36 @@ const requiredS3EnvVars = [
   'AWS_S3_BUCKET_NAME',
 ]
 
+function readEnv(name) {
+  const rawValue = process.env[name]
+
+  if (rawValue === undefined || rawValue === null) {
+    return ''
+  }
+
+  const cleaned = String(rawValue).trim()
+
+  if (
+    (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+    (cleaned.startsWith("'") && cleaned.endsWith("'"))
+  ) {
+    return cleaned.slice(1, -1).trim()
+  }
+
+  return cleaned
+}
+
+function getS3Config() {
+  return {
+    accessKeyId: readEnv('AWS_ACCESS_KEY_ID'),
+    secretAccessKey: readEnv('AWS_SECRET_ACCESS_KEY'),
+    region: readEnv('AWS_REGION') || 'ap-southeast-1',
+    bucketName: readEnv('AWS_S3_BUCKET_NAME'),
+  }
+}
+
 function getMissingS3EnvVars() {
-  return requiredS3EnvVars.filter(name => !process.env[name])
+  return requiredS3EnvVars.filter(name => !readEnv(name))
 }
 
 function assertS3EnvVars() {
@@ -19,20 +47,21 @@ function assertS3EnvVars() {
   }
 }
 
+const s3Config = getS3Config()
+
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'ap-southeast-1',
+  region: s3Config.region,
   credentials:
-    process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+    s3Config.accessKeyId && s3Config.secretAccessKey
       ? {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+          accessKeyId: s3Config.accessKeyId,
+          secretAccessKey: s3Config.secretAccessKey,
         }
       : undefined,
 })
 
 function buildPublicFileUrl(key) {
-  const bucketName = process.env.AWS_S3_BUCKET_NAME
-  const region = process.env.AWS_REGION
+  const { bucketName, region } = getS3Config()
 
   if (region === 'us-east-1') {
     return `https://${bucketName}.s3.amazonaws.com/${key}`
@@ -45,4 +74,5 @@ module.exports = {
   s3Client,
   assertS3EnvVars,
   buildPublicFileUrl,
+  getS3Config,
 }

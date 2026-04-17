@@ -2,7 +2,7 @@ const { randomUUID } = require('crypto')
 const path = require('path')
 const multer = require('multer')
 const { PutObjectCommand } = require('@aws-sdk/client-s3')
-const { s3Client, assertS3EnvVars, buildPublicFileUrl } = require('../utils/s3Config')
+const { s3Client, assertS3EnvVars, buildPublicFileUrl, getS3Config } = require('../utils/s3Config')
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
 
@@ -51,7 +51,7 @@ async function uploadPhoto(req, res) {
   try {
     assertS3EnvVars()
 
-    const bucketName = process.env.AWS_S3_BUCKET_NAME
+    const { bucketName } = getS3Config()
     const fileExtension = path.extname(req.file.originalname || '').toLowerCase()
     const safeExtension = fileExtension || '.jpg'
     const objectKey = `reports/${Date.now()}-${randomUUID()}${safeExtension}`

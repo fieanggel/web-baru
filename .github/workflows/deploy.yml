@@ -25,6 +25,10 @@ jobs:
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           ADMIN_SEED_PASSWORD: ${{ secrets.ADMIN_SEED_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
         with:
           host: ${{ env.BE_PRIVATE_IP }}
           username: ${{ env.EC2_USER }}
@@ -32,11 +36,21 @@ jobs:
           proxy_host: ${{ env.FE_PUBLIC_IP }}
           proxy_username: ${{ env.EC2_USER }}
           proxy_key: ${{ secrets.EC2_PEM_KEY || secrets.EC2_SSH_KEY }}
-          envs: DB_PASSWORD,ADMIN_SEED_PASSWORD,REPO_DIR,REPO_URL,RDS_HOST,FE_PUBLIC_IP
+          envs: DB_PASSWORD,ADMIN_SEED_PASSWORD,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,AWS_S3_BUCKET_NAME,REPO_DIR,REPO_URL,RDS_HOST,FE_PUBLIC_IP
           script: |
             set -e
             if [ -z "${DB_PASSWORD}" ]; then
               echo "DB_PASSWORD secret is empty. Set GitHub secret DB_PASSWORD before deploy." >&2
+              exit 1
+            fi
+
+            if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+              echo "AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY is empty. Set GitHub secrets before deploy for S3 upload." >&2
+              exit 1
+            fi
+
+            if [ -z "${AWS_S3_BUCKET_NAME}" ]; then
+              echo "AWS_S3_BUCKET_NAME is empty. Set GitHub secret AWS_S3_BUCKET_NAME before deploy." >&2
               exit 1
             fi
 
@@ -62,10 +76,10 @@ jobs:
               echo "ADMIN_SEED_PASSWORD=${ADMIN_SEED_PASSWORD:-Admin12345!}"
               echo "ADMIN_SEED_FORCE_PASSWORD_RESET=false"
               echo "CORS_ORIGIN=http://${FE_PUBLIC_IP}"
-              echo "AWS_ACCESS_KEY_ID="
-              echo "AWS_SECRET_ACCESS_KEY="
-              echo "AWS_REGION=us-east-1"
-              echo "AWS_S3_BUCKET_NAME=bucket-difie"
+              echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}"
+              echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
+              echo "AWS_REGION=${AWS_REGION:-us-east-1}"
+              echo "AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}"
             } > .env
 
             docker compose up --build -d

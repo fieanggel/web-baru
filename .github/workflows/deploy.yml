@@ -117,6 +117,11 @@ jobs:
             docker save "${DOCKERHUB_USERNAME}/bedifie:latest" \
               | ssh -i "${SSH_BE_KEY_PATH}" -o StrictHostKeyChecking=no "${EC2_USER}@${BE_PRIVATE_IP}" "sudo docker load"
 
+            # FE host is only used as transfer bridge; remove backend image to prevent disk bloat.
+            docker image rm "${DOCKERHUB_USERNAME}/bedifie:latest" || true
+            docker image prune -af || true
+            docker builder prune -af || true
+
             ssh -i "${SSH_BE_KEY_PATH}" -o StrictHostKeyChecking=no "${EC2_USER}@${BE_PRIVATE_IP}" "mkdir -p '${REPO_DIR}/deployment/ec2-be'"
             scp -i "${SSH_BE_KEY_PATH}" -o StrictHostKeyChecking=no \
               "${REPO_DIR}/deployment/ec2-be/docker-compose.yml" \
@@ -166,11 +171,13 @@ jobs:
     steps:
       - name: SSH to FE and deploy frontend
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         with:
           host: ${{ env.FE_PUBLIC_IP }}
           username: ${{ env.EC2_USER }}
           key: ${{ secrets.EC2_PEM_KEY || secrets.EC2_SSH_KEY }}
-          envs: REPO_DIR,REPO_URL
+          envs: REPO_DIR,REPO_URL,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN
           script: |
             set -e
             if [ ! -d "${REPO_DIR}/.git" ]; then
@@ -180,6 +187,31 @@ jobs:
             cd "${REPO_DIR}"
             git pull origin main
 
+            if [ -n "${DOCKERHUB_TOKEN}" ]; then
+              echo "${DOCKERHUB_TOKEN}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+            fi
+
             cd deployment/ec2-fe
-            docker compose pull frontend
-            docker compose up -d --force-recreate
+
+            echo "Disk usage before frontend deploy:"
+            df -h /
+            docker system df || true
+
+            # First pass cleanup keeps running services and removes stale caches/images.
+            docker image prune -af || true
+            docker builder prune -af || true
+
+            if ! docker compose pull frontend nginx; then
+              echo "Image pull failed. Running aggressive cleanup and retrying once..."
+              docker compose down --remove-orphans || true
+              docker system prune -af --volumes || true
+              docker builder prune -af || true
+              docker compose pull frontend nginx
+            fi
+
+            docker compose up -d --force-recreate frontend nginx
+            docker compose ps
+
+            echo "Disk usage after frontend deploy:"
+            df -h /
+            docker system df || true

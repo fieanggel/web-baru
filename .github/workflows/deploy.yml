@@ -10,13 +10,56 @@ env:
   FE_PUBLIC_IP: 98.80.187.179
   BE_PRIVATE_IP: 10.20.2.77
   EC2_USER: ubuntu
+  DOCKERHUB_USERNAME: raelqiansyah
   REPO_URL: https://github.com/fieanggel/web-baru.git
   REPO_DIR: /home/ubuntu/web-baru
   RDS_HOST: dbdifie.cgxgc8wsgidd.us-east-1.rds.amazonaws.com
 
 jobs:
+  build-images:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Hub token
+        run: |
+          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "DOCKERHUB_TOKEN secret is empty. Set GitHub secret DOCKERHUB_TOKEN before deploy." >&2
+            exit 1
+          fi
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_USERNAME }}/bedifie:latest
+            ${{ env.DOCKERHUB_USERNAME }}/bedifie:${{ github.sha }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=/api
+          tags: |
+            ${{ env.DOCKERHUB_USERNAME }}/fedifie:latest
+            ${{ env.DOCKERHUB_USERNAME }}/fedifie:${{ github.sha }}
+
   deploy-backend:
     name: Deploy Backend via Bastion
+    needs: build-images
     runs-on: ubuntu-latest
 
     steps:
@@ -86,11 +129,14 @@ jobs:
               echo "AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME_CLEAN}"
             } > .env
 
-            docker compose up --build -d
+            docker compose pull backend
+            docker compose up -d --force-recreate backend
 
   deploy-frontend:
     name: Deploy Frontend
-    needs: deploy-backend
+    needs:
+      - build-images
+      - deploy-backend
     runs-on: ubuntu-latest
 
     steps:
@@ -111,4 +157,5 @@ jobs:
             git pull origin main
 
             cd deployment/ec2-fe
-            docker compose up -d --build --force-recreate
+            docker compose pull frontend
+            docker compose up -d --force-recreate

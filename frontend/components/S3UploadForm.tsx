@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { buildApiUrl } from "@/lib/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 type UploadResponse = {
@@ -57,7 +57,7 @@ export default function S3UploadForm() {
       const formData = new FormData();
       formData.append("photo", selectedFile);
 
-      const response = await fetch(`${API_BASE_URL}/api/upload`, {
+      const response = await fetch(buildApiUrl("/api/upload"), {
         method: "POST",
         body: formData,
       });

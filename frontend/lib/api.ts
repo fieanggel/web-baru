@@ -1,6 +1,19 @@
 import type { SessionUser } from "./auth";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api").replace(/\/+$/, "");
+
+export function buildApiUrl(path: string) {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const baseEndsWithApi = API_BASE_URL === "/api" || API_BASE_URL.endsWith("/api");
+  const pathStartsWithApi =
+    normalizedPath === "/api" || normalizedPath.startsWith("/api/");
+
+  if (baseEndsWithApi && pathStartsWithApi) {
+    return `${API_BASE_URL}${normalizedPath.slice(4)}`;
+  }
+
+  return `${API_BASE_URL}${normalizedPath}`;
+}
 
 type ApiResponse<T> = {
   success?: boolean;
@@ -168,7 +181,7 @@ async function requestJson<T>(
   path: string,
   options: RequestInit & { token?: string } = {},
 ): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(buildApiUrl(path), {
     ...options,
     headers: withBearer(options.headers, options.token),
   });
@@ -228,7 +241,7 @@ export const uploadApi = {
     const formData = new FormData();
     formData.append("photo", file);
 
-    const response = await fetch(`${API_BASE_URL}/api/upload`, {
+    const response = await fetch(buildApiUrl("/api/upload"), {
       method: "POST",
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       body: formData,

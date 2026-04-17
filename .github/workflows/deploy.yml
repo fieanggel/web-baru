@@ -1,98 +1,86 @@
-name: Build And Deploy To Two EC2
+name: Deploy 3-Tier App
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 env:
-  FRONTEND_IMAGE: raelqiansyah/fedifie
-  BACKEND_IMAGE: raelqiansyah/bedifie
-  FRONTEND_API_BASE_URL: /api
+  FE_PUBLIC_IP: 98.80.187.179
+  BE_PRIVATE_IP: 10.20.2.77
+  EC2_USER: ubuntu
+  REPO_URL: https://github.com/fieanggel/web-baru.git
+  REPO_DIR: /home/ubuntu/web-baru
+  RDS_HOST: dbdifie.cgxgc8wsgidd.us-east-1.rds.amazonaws.com
 
 jobs:
-  build:
-    name: Build And Push Docker Images
+  deploy-backend:
+    name: Deploy Backend via Bastion
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
-          push: true
-          build-args: |
-            NEXT_PUBLIC_API_BASE_URL=${{ env.FRONTEND_API_BASE_URL }}
-          tags: |
-            ${{ env.FRONTEND_IMAGE }}:latest
-
-      - name: Build and push backend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend
-          file: ./backend/Dockerfile
-          push: true
-          tags: |
-            ${{ env.BACKEND_IMAGE }}:latest
-
-  deploy-fe:
-    name: Deploy Frontend To FE EC2
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy frontend container
+      - name: SSH Jump FE -> BE and deploy backend
         uses: appleboy/ssh-action@v1.2.0
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         with:
-          host: ${{ secrets.EC2_FE_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD
+          host: ${{ env.BE_PRIVATE_IP }}
+          username: ${{ env.EC2_USER }}
+          key: ${{ secrets.EC2_PEM_KEY }}
+          proxy_host: ${{ env.FE_PUBLIC_IP }}
+          proxy_username: ${{ env.EC2_USER }}
+          proxy_key: ${{ secrets.EC2_PEM_KEY }}
+          envs: DB_PASSWORD,REPO_DIR,REPO_URL,RDS_HOST,FE_PUBLIC_IP
           script: |
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-            cd /home/ubuntu/web-baru/deployment/ec2-fe
-            docker compose pull
-            docker compose up -d --build
+            set -e
+            if [ ! -d "${REPO_DIR}/.git" ]; then
+              git clone "${REPO_URL}" "${REPO_DIR}"
+            fi
 
-  deploy-be:
-    name: Deploy Backend To BE EC2
-    needs: build
+            cd "${REPO_DIR}"
+            git pull origin main
+
+            cd deployment/ec2-be
+            {
+              echo "DB_HOST=${RDS_HOST}"
+              echo "DB_PORT=3306"
+              echo "DB_USER=admin"
+              echo "DB_PASSWORD=${DB_PASSWORD}"
+              echo "DB_NAME=user_crud"
+              echo "PORT=4000"
+              echo "JWT_SECRET=replace-with-strong-secret"
+              echo "JWT_EXPIRES_IN=7d"
+              echo "CORS_ORIGIN=http://${FE_PUBLIC_IP}"
+              echo "AWS_ACCESS_KEY_ID="
+              echo "AWS_SECRET_ACCESS_KEY="
+              echo "AWS_REGION=us-east-1"
+              echo "AWS_S3_BUCKET_NAME=bucket-difie"
+            } > .env
+
+            docker compose up --build -d
+
+  deploy-frontend:
+    name: Deploy Frontend
+    needs: deploy-backend
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy backend container
+      - name: SSH to FE and deploy frontend
         uses: appleboy/ssh-action@v1.2.0
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         with:
-          host: ${{ secrets.EC2_BE_HOST }}
-          port: 22
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          proxy_host: ${{ secrets.EC2_FE_HOST }}
-          proxy_port: 22
-          proxy_username: ${{ secrets.EC2_USERNAME }}
-          proxy_key: ${{ secrets.EC2_SSH_KEY }}
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD
+          host: ${{ env.FE_PUBLIC_IP }}
+          username: ${{ env.EC2_USER }}
+          key: ${{ secrets.EC2_PEM_KEY }}
+          envs: REPO_DIR,REPO_URL
           script: |
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-            cd /home/ubuntu/web-baru/deployment/ec2-be
-            docker compose pull
-            docker compose up -d
+            set -e
+            if [ ! -d "${REPO_DIR}/.git" ]; then
+              git clone "${REPO_URL}" "${REPO_DIR}"
+            fi
+
+            cd "${REPO_DIR}"
+            git pull origin main
+
+            cd deployment/ec2-fe
+            docker compose up --build -d

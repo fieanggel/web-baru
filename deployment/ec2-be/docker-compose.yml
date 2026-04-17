@@ -4,7 +4,7 @@ services:
     container_name: bedifie-backend
     restart: unless-stopped
     environment:
-      - PORT=${PORT:-8080}
+      - PORT=${PORT:-4000}
       - DB_HOST=${DB_HOST:-dbdifie.cgxgc8wsgidd.us-east-1.rds.amazonaws.com}
       - DB_PORT=${DB_PORT:-3306}
       - DB_USER=${DB_USER:-admin}
@@ -21,4 +21,4 @@ services:
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-bucket-difie}
     ports:
-      - "8080:8080"
+      - "4000:4000"

@@ -11,6 +11,11 @@ const connectTimeout = process.env.DB_CONNECT_TIMEOUT
   : 10000
 const useSsl = process.env.DB_SSL === 'true'
 const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false'
+const isLocalDbHost = dbHost === '127.0.0.1' || dbHost === 'localhost'
+
+if (!isLocalDbHost && !dbPassword) {
+  throw new Error(`DB_PASSWORD is required when DB_HOST is set to ${dbHost}`)
+}
 
 const pool = mysql.createPool({
   host: dbHost,

@@ -29,6 +29,10 @@ DB_NAME=user_crud
 PORT=4000
 JWT_SECRET=replace-this-with-a-strong-secret
 JWT_EXPIRES_IN=7d
+ADMIN_SEED_NAME=Administrator
+ADMIN_SEED_EMAIL=admin@bedifie.local
+ADMIN_SEED_PASSWORD=Admin12345!
+ADMIN_SEED_FORCE_PASSWORD_RESET=false
 
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
@@ -42,11 +46,19 @@ Catatan: URL yang dikembalikan endpoint upload bersifat publik. Pastikan bucket/
 
 ```bash
 cd backend
-npm run migrate
 npm run dev
 ```
 
 Server akan berjalan di `http://localhost:4000`.
+
+Saat server start, backend akan otomatis menjalankan migrasi database dan seed akun admin.
+
+Default akun seed admin:
+
+- Email: `admin@bedifie.local`
+- Password: `Admin12345!`
+
+Sangat disarankan mengganti `ADMIN_SEED_PASSWORD` di environment produksi.
 
 ## Endpoint yang tersedia
 

@@ -24,6 +24,7 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          ADMIN_SEED_PASSWORD: ${{ secrets.ADMIN_SEED_PASSWORD }}
         with:
           host: ${{ env.BE_PRIVATE_IP }}
           username: ${{ env.EC2_USER }}
@@ -31,9 +32,14 @@ jobs:
           proxy_host: ${{ env.FE_PUBLIC_IP }}
           proxy_username: ${{ env.EC2_USER }}
           proxy_key: ${{ secrets.EC2_PEM_KEY || secrets.EC2_SSH_KEY }}
-          envs: DB_PASSWORD,REPO_DIR,REPO_URL,RDS_HOST,FE_PUBLIC_IP
+          envs: DB_PASSWORD,ADMIN_SEED_PASSWORD,REPO_DIR,REPO_URL,RDS_HOST,FE_PUBLIC_IP
           script: |
             set -e
+            if [ -z "${DB_PASSWORD}" ]; then
+              echo "DB_PASSWORD secret is empty. Set GitHub secret DB_PASSWORD before deploy." >&2
+              exit 1
+            fi
+
             if [ ! -d "${REPO_DIR}/.git" ]; then
               git clone "${REPO_URL}" "${REPO_DIR}"
             fi
@@ -51,6 +57,10 @@ jobs:
               echo "PORT=4000"
               echo "JWT_SECRET=replace-with-strong-secret"
               echo "JWT_EXPIRES_IN=7d"
+              echo "ADMIN_SEED_NAME=Administrator"
+              echo "ADMIN_SEED_EMAIL=admin@bedifie.local"
+              echo "ADMIN_SEED_PASSWORD=${ADMIN_SEED_PASSWORD:-Admin12345!}"
+              echo "ADMIN_SEED_FORCE_PASSWORD_RESET=false"
               echo "CORS_ORIGIN=http://${FE_PUBLIC_IP}"
               echo "AWS_ACCESS_KEY_ID="
               echo "AWS_SECRET_ACCESS_KEY="

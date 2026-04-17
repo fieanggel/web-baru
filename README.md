@@ -6,6 +6,29 @@ Proyek ini berisi 3 service utama:
 - Backend Node.js/Express
 - Nginx reverse proxy
 
+## Identitas
+
+- Nama: Difie Anggely
+- NRP: 152023186
+
+## Akun Seed Admin
+
+Backend membuat akun seed admin saat proses migrasi/startup.
+
+- Nama default: Administrator
+- Email default: admin@bedifie.local
+- Password default: Admin12345!
+- Role: ADMIN
+
+Variabel environment untuk mengatur akun seed:
+
+- ADMIN_SEED_NAME
+- ADMIN_SEED_EMAIL
+- ADMIN_SEED_PASSWORD
+- ADMIN_SEED_FORCE_PASSWORD_RESET
+
+Catatan: untuk production, ganti password default melalui `ADMIN_SEED_PASSWORD` (atau GitHub secret `ADMIN_SEED_PASSWORD`) sebelum deploy.
+
 ## Menjalankan dengan Docker Compose
 
 1. Salin contoh env:
@@ -106,7 +129,7 @@ DB_HOST=dbdifie.cgxgc8wsgidd.us-east-1.rds.amazonaws.com
 DB_PORT=3306
 DB_USER=admin
 DB_PASSWORD=replace-with-rds-password
-DB_NAME=dbdifie
+DB_NAME=user_crud
 DB_CONNECT_TIMEOUT=10000
 DB_SSL=false
 DB_SSL_REJECT_UNAUTHORIZED=true

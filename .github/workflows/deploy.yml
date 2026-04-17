@@ -53,7 +53,7 @@ jobs:
               echo "DB_PORT=3306"
               echo "DB_USER=admin"
               echo "DB_PASSWORD=${DB_PASSWORD}"
-              echo "DB_NAME=dbdifie"
+              echo "DB_NAME=user_crud"
               echo "PORT=4000"
               echo "JWT_SECRET=replace-with-strong-secret"
               echo "JWT_EXPIRES_IN=7d"

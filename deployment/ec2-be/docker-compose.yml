@@ -9,7 +9,7 @@ services:
       - DB_PORT=${DB_PORT:-3306}
       - DB_USER=${DB_USER:-admin}
       - DB_PASSWORD=${DB_PASSWORD:?DB_PASSWORD is required}
-      - DB_NAME=${DB_NAME:-dbdifie}
+      - DB_NAME=${DB_NAME:-user_crud}
       - DB_CONNECT_TIMEOUT=${DB_CONNECT_TIMEOUT:-10000}
       - DB_SSL=${DB_SSL:-false}
       - DB_SSL_REJECT_UNAUTHORIZED=${DB_SSL_REJECT_UNAUTHORIZED:-true}
